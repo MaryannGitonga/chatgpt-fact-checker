@@ -1,28 +1,75 @@
 import './normalize.css'
 import './App.css';
+import { useState } from 'react';
 
 function App() {
+
+  const [input, setInput] = useState("");
+  const [chatLog, setChatLog] = useState([
+    {
+      user: "gpt",
+      message: "How can I help you today?"
+    }
+  ]);
+
+  function clearChat(){
+    setChatLog([]);
+  }
+  
+  async function handleSubmit(e) {
+    e.preventDefault()
+
+    let newChatLog = [...chatLog, {user: "me", message: `${input}`}];
+    setChatLog(newChatLog);
+    setInput("")
+
+    console.log(newChatLog);
+
+    const response = await fetch("http://localhost:3080", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: newChatLog.map((message) => message.message).join("")
+      })
+    });
+
+    const data = await response.json();
+    setChatLog([...newChatLog, {user: "gpt", message: `${data.message}`}]);
+  }
+
   return (
     <div className="App">
       <aside className="sidemenu">
-        <div className="side-menu-button"><span>+</span>New Chat</div>
+        <div className="side-menu-button" onClick={clearChat}><span>+</span>New Chat</div>
       </aside>
       <section className="chatbox">
         <div className="chat-log">
-          <div className="chat-message">
-            <div className="chat-message-center">
-              <div className="avatar">
-              
-              </div>
-              <div className="message">
-                Hello world!
-              </div>
-            </div>
-          </div>
-          <div className="chat-message chatgpt">
-            <div className="chat-message-center">
-              <div className="avatar chatgpt">
-              <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet">
+          {chatLog.map((message, index) => {
+            return <ChatMessage key={index} message={message}/>
+          })}
+        </div>
+        <div className="chat-input-holder">
+          <form onSubmit={handleSubmit}>
+          <input 
+          className="chat-input-textarea" 
+          rows="1" 
+          value={input}
+          onChange={(e) => setInput(e.target.value)}></input>
+          </form>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+const ChatMessage = ({message}) => {
+  return (
+    <div className={`chat-message ${message.user === "gpt" && "chatgpt"}`}>
+      <div className="chat-message-center">
+        <div className={`avatar ${message.user === "gpt" && "chatgpt"}`}>
+          {message.user === 'gpt' && <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet">
                 <path 
                 fill="white" 
                 fillRule="evenodd" 
@@ -81,20 +128,16 @@ function App() {
                 9.58517C14.7025 9.69878 14.5366 9.86356 14.4215 10.0626C14.3065 10.2616 14.2466 
                 10.4877 14.2479 10.7175L14.2424 21.9419ZM16.071 17.9991L20.4018 15.4978L24.7325 
                 17.9975V22.9985L20.4018 25.4983L16.071 22.9985V17.9991Z" />
-              </svg>
-              </div>
-              <div className="message">
-                I am an AI!
-              </div>
-            </div>
-          </div>
+              </svg>}
         </div>
-        <div className="chat-input-holder">
-          <textarea className="chat-input-textarea" rows="1" placeholder=""></textarea>
+        <div className="message">
+          {/* {message.message} */}
+          <pre>{message.message}</pre>
         </div>
-      </section>
+      </div>
     </div>
-  );
-}
+  )
+};
+
 
 export default App;
