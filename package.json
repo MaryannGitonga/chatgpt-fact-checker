@@ -1,11 +1,11 @@
 {
-  "name": "chatgpt-fact-checker",
+  "name": "chatgpt-server",
   "version": "1.0.0",
-  "description": "A fact checker for ChatGPT",
+  "description": "Server-side of a fact checker for ChatGPT",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "node script.js"
+    "dev": "node index.js"
   },
   "keywords": [],
   "author": "",
